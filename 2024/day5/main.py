@@ -77,37 +77,34 @@ Determine which updates are already in the correct order. What do you get if you
 
 
 class Solver:
-    def __init__(self, rules: list[str], updates: list[str]) -> None:
+    def __init__(self, rules: list[str]) -> None:
         self.rules = [rule.split('|') for rule in rules]
-        self.updates = [update.split(',') for update in updates]
+        self.rulebook = self._create_rulebook()
 
-        self._rulebook: dict[int, set[int]] = {}
-        _ = self.rulebook  # init
+    def _create_rulebook(self) -> dict[int, set[int]]:
+        rulebook = {}
+        pairs = (map(int, rule) for rule in self.rules)
+        for left, right in pairs:
+            rulebook.setdefault(right, set()).add(left)
+        return rulebook
 
-    @property
-    def rulebook(self) -> dict[int, set[int]]:
-        if not self._rulebook:
-            for left, right in self.rules:
-                self._rulebook.setdefault(int(right), set()).add(int(left))
-        return self._rulebook
-
-    def is_valid_update(self, update: list[str]) -> bool:
+    def is_valid_update(self, update: list[int]) -> bool:
         seen = set()
 
-        for num in reversed(list(map(int, update))):
-            if any(page in seen for page in self.rulebook.get(num, [])):
-                return False
-        return True
+        for num in reversed(update):
+            for page in self.rulebook.get(num, ()):
+                if page in seen:
+                    return False
+            seen.add(num)
 
-    def filtered_updates(self) -> list[list[str]]:
-        return list(filter(self.is_valid_update, self.updates))
+        return True
 
 
 if __name__ == '__main__':
     rules: list[str] = []
     updates: list[str] = []
 
-    with open('./2024/day5/input copy.txt') as file:
+    with open('./2024/day5/input.txt') as file:
         # gather rules
         while line := file.readline():
             if not (line := line.strip()):
@@ -120,8 +117,15 @@ if __name__ == '__main__':
                 break
             updates.append(line)
 
-    solver = Solver(rules, updates)
-    for u in solver.filtered_updates():
-        print(u)
+    solver = Solver(rules)
 
-    # print(solver.find_all())  # 2571
+    middle_sum = 0
+    for update in updates:
+        splited = list(map(int, update.split(',')))
+        if not solver.is_valid_update(splited):
+            continue
+        # get middle element
+        assert len(splited) % 2 == 1
+        middle_sum += splited[len(splited) // 2]
+
+    print(middle_sum)  # 6267
