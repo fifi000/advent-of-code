@@ -31,7 +31,6 @@ The engineers just need the total calibration result, which is the sum of the te
 Determine which equations could possibly be true. What is their total calibration result?
 """
 
-from itertools import product
 import re
 import time
 
@@ -130,7 +129,6 @@ if __name__ == '__main__':
     main()
 
     length = 4
-    []
     for i in range(0, 3):
         for idx in range(length):
             print()
