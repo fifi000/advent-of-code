@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "zig build-exe",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-Command",
+        "New-Item -ItemType Directory -Force -Path ./zig-out/bin; zig build-exe ${file} -femit-bin=zig-out/bin/debug"
+      ]
+    }
+  ]
+}

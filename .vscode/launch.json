@@ -2,16 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": ".NET Script Debug",
-      "type": "coreclr",
+      "type": "lldb",
+      "name": "Debug zig file",
       "request": "launch",
-      "program": "${env:HOME}/.dotnet/tools/dotnet-script",
-      "args": ["${file}"],
-      "windows": {
-        "program": "${env:USERPROFILE}/.dotnet/tools/dotnet-script.exe",
-      },
+      "program": "${workspaceFolder}\\zig-out\\bin\\debug",
       "cwd": "${workspaceFolder}",
-      "stopAtEntry": false,
+      "preLaunchTask": "zig build-exe"
     }
   ]
 }
