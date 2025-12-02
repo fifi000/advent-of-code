@@ -48,7 +48,7 @@ pub fn main() !void {
 
     const list = try getLines(allocator, input);
 
-    const result = try solve(list.items, 50, 99);
+    const result = try solveNaive(list.items, 50, 99);
 
     print("result: '{any}'\n", .{result});
 }
@@ -84,6 +84,7 @@ fn solve(operations: []const String, current: Int, max: Int) !Int {
     var counter: Int = 0;
     var number = current;
 
+    print("solve fn\n", .{});
     for (operations) |operation| {
         const rotation = Rotation.parse(operation);
 
@@ -98,10 +99,62 @@ fn solve(operations: []const String, current: Int, max: Int) !Int {
             },
         }
 
-        print("counter: {}, number: {}\n", .{ counter, number });
+        print("operation: {s}, counter: {}, number: {}\n", .{ operation, counter, number });
     }
 
     return counter;
+}
+
+fn solveNaive(operations: []const String, current: Int, max: Int) !Int {
+    var counter: Int = 0;
+    var number = current;
+
+    print("solveNaive fn\n", .{});
+    for (operations) |operation| {
+        const rotation = Rotation.parse(operation);
+
+        switch (rotation.direction) {
+            .right => {
+                for (0..@intCast(rotation.distance)) |_| {
+                    number += 1;
+
+                    if (number > max) number = 0;
+
+                    if (number == 0) counter += 1;
+                }
+            },
+            .left => {
+                for (0..@intCast(rotation.distance)) |_| {
+                    number -= 1;
+
+                    if (number < 0) number = max;
+
+                    if (number == 0) counter += 1;
+                }
+            },
+        }
+
+        print("operation: {s}, counter: {}, number: {}\n", .{ operation, counter, number });
+    }
+
+    return counter;
+}
+
+test "solveNaive1" {
+    const operations = [_]String{
+        "L40",
+        "L72",
+        "L4",
+        "R54",
+        "R94",
+        "L8",
+        "R94",
+        "L6",
+        "L62",
+        "R64",
+    };
+
+    try std.testing.expectEqual(try solveNaive(&operations, 50, 99), try solve(&operations, 50, 99));
 }
 
 test "solve1" {
@@ -119,11 +172,12 @@ test "solve1" {
     };
 
     try std.testing.expectEqual(6, try solve(&operations, 50, 99));
+    try std.testing.expectEqual(6, try solveNaive(&operations, 50, 99));
 }
 
 test "solve2" {
     const operations = [_]String{"R1000"};
 
     try std.testing.expectEqual(10, try solve(&operations, 50, 99));
-    try std.testing.expectEqual(10, try solve(&[_]String{"L1000"}, 50, 99));
+    try std.testing.expectEqual(10, try solveNaive(&operations, 50, 99));
 }
