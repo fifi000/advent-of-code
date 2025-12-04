@@ -8,6 +8,14 @@
       "program": "${workspaceFolder}\\zig-out\\bin\\debug",
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "zig build-exe"
+    },
+    {
+      "type": "lldb",
+      "name": "Debug zig test",
+      "request": "launch",
+      "program": "${workspaceFolder}\\zig-out\\bin\\debug-test",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "zig build-test"
     }
   ]
 }
