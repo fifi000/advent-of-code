@@ -47,43 +47,25 @@ pub fn main() !void {
     const input = try getInput("./2025/day4/input.txt");
 
     const list = try getLines(allocator, input);
-    const diagram = createMutableArray(allocator, list.items);
 
-    const result = solve(diagram);
+    const result = solve(list.items);
 
     print("result: '{any}'\n", .{result});
 }
 
-fn createMutableArray(gpa: Allocator, source: []const []const u8) [][]u8 {
-    var list = ArrayList([]u8).empty;
-
-    for (source) |row| {
-        const copy = gpa.dupe(u8, row) catch @panic("Out of memory - dupe");
-        list.append(gpa, copy) catch @panic("Out of memory - append");
-    }
-
-    return list.items;
-}
-
-fn solve(diagram: [][]u8) Int {
+fn solve(diagram: []const String) Int {
     var counter: Int = 0;
-    var changed: bool = true;
 
-    while (changed) {
-        changed = false;
+    for (diagram, 0..) |row, i| {
+        for (row, 0..) |cell, j| {
+            if (!isPaperRoll(cell)) {
+                continue;
+            }
 
-        for (diagram, 0..) |row, i| {
-            for (row, 0..) |cell, j| {
-                if (!isPaperRoll(cell)) {
-                    continue;
-                }
-
-                const papers = countAdjacentPapers(diagram, i, j);
-                if (papers < 4) {
-                    counter += 1;
-                    diagram[i][j] = '.';
-                    changed = true;
-                }
+            const papers = countAdjacentPapers(diagram, i, j);
+            if (papers < 4) {
+                counter += 1;
+                // print("Position({}, {})\n", .{ i, j });
             }
         }
     }
@@ -91,7 +73,7 @@ fn solve(diagram: [][]u8) Int {
     return counter;
 }
 
-fn countAdjacentPapers(diagram: []const []const u8, row_idx: usize, column_idx: usize) u8 {
+fn countAdjacentPapers(diagram: []const String, row_idx: usize, column_idx: usize) u8 {
     var counter: u8 = 0;
 
     left: {
@@ -164,14 +146,10 @@ fn isPaperRoll(c: u8) bool {
 }
 
 test countAdjacentPapers {
-    var row1 = [_]u8{ '@', '.', '@' };
-    var row2 = [_]u8{ '.', '@', '@' };
-    var row3 = [_]u8{ '@', '.', '@' };
-
-    var diagram = [_][]u8{
-        &row1,
-        &row2,
-        &row3,
+    const diagram = [_]String{
+        "@.@",
+        ".@@",
+        "@.@",
     };
 
     // top
@@ -191,29 +169,18 @@ test countAdjacentPapers {
 }
 
 test solve {
-    var row0 = [_]u8{ '.', '.', '@', '@', '.', '@', '@', '@', '@', '.' };
-    var row1 = [_]u8{ '@', '@', '@', '.', '@', '.', '@', '.', '@', '@' };
-    var row2 = [_]u8{ '@', '@', '@', '@', '@', '.', '@', '.', '@', '@' };
-    var row3 = [_]u8{ '@', '.', '@', '@', '@', '@', '.', '.', '@', '.' };
-    var row4 = [_]u8{ '@', '@', '.', '@', '@', '@', '@', '.', '@', '@' };
-    var row5 = [_]u8{ '.', '@', '@', '@', '@', '@', '@', '@', '.', '@' };
-    var row6 = [_]u8{ '.', '@', '.', '@', '.', '@', '.', '@', '@', '@' };
-    var row7 = [_]u8{ '@', '.', '@', '@', '@', '.', '@', '@', '@', '@' };
-    var row8 = [_]u8{ '.', '@', '@', '@', '@', '@', '@', '@', '@', '.' };
-    var row9 = [_]u8{ '@', '.', '@', '.', '@', '@', '@', '.', '@', '.' };
-
-    var diagram = [_][]u8{
-        &row0,
-        &row1,
-        &row2,
-        &row3,
-        &row4,
-        &row5,
-        &row6,
-        &row7,
-        &row8,
-        &row9,
+    const diagram = [_]String{
+        "..@@.@@@@.",
+        "@@@.@.@.@@",
+        "@@@@@.@.@@",
+        "@.@@@@..@.",
+        "@@.@@@@.@@",
+        ".@@@@@@@.@",
+        ".@.@.@.@@@",
+        "@.@@@.@@@@",
+        ".@@@@@@@@.",
+        "@.@.@@@.@.",
     };
 
-    try std.testing.expectEqual(43, solve(&diagram));
+    try std.testing.expectEqual(13, solve(&diagram));
 }
