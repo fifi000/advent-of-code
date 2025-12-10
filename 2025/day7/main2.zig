@@ -63,6 +63,7 @@ fn solve(allocator: Allocator, lines: []const String) Int {
 
     print("creating tree...\n", .{});
     var node = createTree(allocator, lines);
+    defer node.deinit(allocator);
     print("tree created\n", .{});
 
     print("counting...\n", .{});
@@ -116,9 +117,10 @@ test "solve2" {
 }
 
 test createTree {
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
+    const allocator = std.testing.allocator;
+    // var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    // defer arena.deinit();
+    // const allocator = arena.allocator();
 
     var lines: [8]String = undefined;
     var node: Node = undefined;
@@ -252,5 +254,12 @@ const Node = struct {
 
     pub fn create(row_idx: usize, column_idx: usize) Self {
         return Self{ .position = .{ .row = row_idx, .column = column_idx } };
+    }
+
+    pub fn deinit(self: *Self, allocator: Allocator) void {
+        if (self.left != null) self.left.?.deinit(allocator);
+        if (self.right != null) self.right.?.deinit(allocator);
+
+        allocator.free(self);
     }
 };
